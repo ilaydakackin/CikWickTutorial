@@ -11,6 +11,7 @@ public class PlayerController : MonoBehaviour
     [Header("Movement Settings")]
     [SerializeField] private KeyCode _movementKey;
     [SerializeField] private float _movementSpeed;
+    private StateController _stateController;
     private Rigidbody _playerRigitbody;
     private float _horizontalInput, _verticalInput;
     private Vector3 _movementDirection;
@@ -22,6 +23,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private KeyCode _jumpKey;
     [SerializeField] private float _jumpForce;
     [SerializeField] private float _jumpCoolDown;
+    [SerializeField] private float _airMultipler;
+    [SerializeField] private float _airDrag;
+
     [SerializeField] private bool _canJump;
 
     
@@ -40,6 +44,7 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
+        _stateController = GetComponent<StateController>();
         _playerRigitbody = GetComponent<Rigidbody>();
         _playerRigitbody.freezeRotation = true;
         //Unity'nin fizik motoru, bir nesne bir köşeye çarptığında veya hareket ederken onu doğal olarak döndürmeye çalışır.
@@ -51,6 +56,7 @@ public class PlayerController : MonoBehaviour
     private void Update()
     {
         SetInputs();
+        SetStates();
         SetPlayerDrag();
         LimitPlayerSpeed();
     }
@@ -68,13 +74,11 @@ public class PlayerController : MonoBehaviour
 
         if(Input.GetKeyDown(_slideKey))
         {
-            _isSliding = true;
-            Debug.Log("Player Sliding!");
+            _isSliding = true;    
         }
         else if(Input.GetKeyDown(_movementKey))
         {
-            _isSliding = false;
-             Debug.Log("Player Moving!");
+            _isSliding = false;   
         }
         //eğer _jumpKey'e basarsam önce bu 3 koşula bakacak
         //_jumpKey zıplama tuşuna bastım mı?
@@ -89,6 +93,33 @@ public class PlayerController : MonoBehaviour
         }        
     }
 
+
+    private void SetStates()
+    {
+        var movementDirection = GetMovementDirection();
+        var isGrounded = IsGrounded();
+        var isSliding = IsSliding();
+        var currentState = _stateController.GetCurrentState();
+       
+
+        var newState = currentState switch
+        {
+            _ when movementDirection == Vector3.zero && isGrounded && ! isSliding => PlayerState.Idle,
+            _ when movementDirection != Vector3.zero && isGrounded && ! isSliding => PlayerState.Move,
+            _ when movementDirection != Vector3.zero && isGrounded && ! isSliding => PlayerState.Slide,
+            _ when movementDirection != Vector3.zero && isGrounded && ! isSliding => PlayerState.SlideIdle,
+            _ when movementDirection != Vector3.zero && isGrounded && ! isSliding => PlayerState.SlideIdle,
+            _ when !_canJump && !isGrounded=> PlayerState.Jump,
+            _ => currentState
+        };
+
+        if(newState != currentState)
+        {
+            _stateController.ChangeState(newState);
+        }
+        Debug.Log(newState);
+    }
+
     //Hareket Yönleri x,y ve z
     //Orientation (Yönelim): Karakterin baktığı yöne göre "ileri" gitmesini sağlar. Eğer sadece Vector3.forward deseydin,
     //  karakter dünya eksenine göre hep kuzeye giderdi. Bu satır sayesinde, kamerayı çevirdiğinde "ileri" tuşu kameranın baktığı yöne dönüşür.
@@ -100,19 +131,29 @@ public class PlayerController : MonoBehaviour
         _movementDirection = _orientationTransform.forward * _verticalInput
          + _orientationTransform.right * _horizontalInput;
         
+        //zıplarken nasıl bir hızda olşduğunu belirlemek için
+        float forceMultiplier = _stateController.GetCurrentState() switch
+        {
+            PlayerState.Move => 1f,
+            PlayerState.Slide => _slideMultiplier,
+            PlayerState.Jump => _airMultipler,
+            _ => 1f
+        };
+         _playerRigitbody.AddForce(_movementDirection.normalized * _movementSpeed * forceMultiplier, ForceMode.Force);
         //eğer kayıyorsam _sildeMultiplieri de çarçarak kayma işlemi yap
-        if(_isSliding)
-        {
-             _playerRigitbody.AddForce(_movementDirection.normalized * _movementSpeed * _slideMultiplier, ForceMode.Force);
-        }
-        else
-        {
-            _playerRigitbody.AddForce(_movementDirection.normalized * _movementSpeed, ForceMode.Force);
-        }
+       
        
     }
     private void SetPlayerDrag()
     {
+        _playerRigitbody.linearDamping = _stateController.GetCurrentState() switch
+        {
+            PlayerState.Move => _groundDrag,
+            PlayerState.Slide => _slideDrag,
+            PlayerState.Jump => _airDrag,
+            _ => _playerRigitbody.linearDamping
+
+        };
         if(_isSliding)
         {
              _playerRigitbody.linearDamping = _groundDrag;
@@ -157,5 +198,14 @@ public class PlayerController : MonoBehaviour
     private bool IsGrounded()
     {
         return Physics.Raycast(transform.position, Vector3.down, _playerHeight * 0.5f + 0.2f, _groundLayer);
+    }
+
+    private Vector3 GetMovementDirection()
+    {
+        return _movementDirection.normalized;
+    }
+    private bool IsSliding()
+    {
+        return _isSliding;
     }
 }

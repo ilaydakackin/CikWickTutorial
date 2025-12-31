@@ -1,8 +1,16 @@
+using System;
 using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    //Event Mantığı nedir? 
+    //örneğin zıplandığında ya da bir odaya girildiğinde bu event tetiklenecek sonra animationcontrollera
+    //gidip karakter zıpladığında şunu yap ya da karakter odaya girince şunu yap gibi işlemleri gerçekleştireceğiz   
+    //Start fonksiyonunda çağrılması ömnerilir 
+
+    //OnPlayerJumped: karakterim zıpladığında                                                                                                                                                                     
+    public event Action OnPlayerJumped;
     [Header("Referances")]
     [SerializeField] private Transform _orientationTransform;
 
@@ -102,16 +110,25 @@ public class PlayerController : MonoBehaviour
         var currentState = _stateController.GetCurrentState();
        
 
-        var newState = currentState switch
-        {
-            _ when movementDirection == Vector3.zero && isGrounded && ! isSliding => PlayerState.Idle,
-            _ when movementDirection != Vector3.zero && isGrounded && ! isSliding => PlayerState.Move,
-            _ when movementDirection != Vector3.zero && isGrounded && ! isSliding => PlayerState.Slide,
-            _ when movementDirection != Vector3.zero && isGrounded && ! isSliding => PlayerState.SlideIdle,
-            _ when movementDirection != Vector3.zero && isGrounded && ! isSliding => PlayerState.SlideIdle,
-            _ when !_canJump && !isGrounded=> PlayerState.Jump,
-            _ => currentState
-        };
+      var newState = currentState switch
+    {
+        //Öncelik Sırası Önemli!
+        
+        // 1. Zıplama (En öncelikli)
+        _ when !_canJump && !isGrounded => PlayerState.Jump,
+
+        // 2. Kayma (Hareket ediyor, yerde ve slide tuşuna basılmış)
+        // BURADAKİ HATA DÜZELTİLDİ: !isSliding yerine isSliding kullanıldı.
+        _ when movementDirection != Vector3.zero && isGrounded && isSliding => PlayerState.Slide,
+
+        // 3. Koşma (Hareket ediyor, yerde ve slide tuşuna BASILMAMIŞ)
+        _ when movementDirection != Vector3.zero && isGrounded && !isSliding => PlayerState.Move,
+
+        // 4. Durma (Hareket yok ve yerde)
+        _ when movementDirection == Vector3.zero && isGrounded => PlayerState.Idle,
+
+        _ => currentState
+    };
 
         if(newState != currentState)
         {
@@ -154,14 +171,7 @@ public class PlayerController : MonoBehaviour
             _ => _playerRigitbody.linearDamping
 
         };
-        if(_isSliding)
-        {
-             _playerRigitbody.linearDamping = _groundDrag;
-        }
-        else
-        {
-            _playerRigitbody.linearDamping = _groundDrag;
-        }
+       
     }
 
     //karakterin hızının sınırının ayarlandığı method
@@ -182,8 +192,11 @@ public class PlayerController : MonoBehaviour
     //Çözüm: Zıplamadan hemen önce dikey (Y) hızını sıfırlayarak, her zıplamanın aynı yükseklikte ve tutarlı olmasını sağlıyorsun.
     private void SetPlayerJumping()
     {
+        //OnPlayerJuumped null değil ise Event'i tetikliyorum
+        OnPlayerJumped?.Invoke();
+
         _playerRigitbody.linearVelocity = new Vector3(_playerRigitbody.linearVelocity.x, 0f, _playerRigitbody.linearVelocity.z);
-       _playerRigitbody.AddForce(transform.up * _jumpForce, ForceMode.Impulse);
+        _playerRigitbody.AddForce(transform.up * _jumpForce, ForceMode.Impulse);
     }
     private void ResetJumping()
     {

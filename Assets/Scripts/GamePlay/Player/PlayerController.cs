@@ -21,6 +21,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float _movementSpeed;
     private StateController _stateController;
     private Rigidbody _playerRigitbody;
+    private float _startingMovementSpeed, _startingJumpForce;
     private float _horizontalInput, _verticalInput;
     private Vector3 _movementDirection;
     private bool _isSliding = false;
@@ -58,6 +59,9 @@ public class PlayerController : MonoBehaviour
         //Unity'nin fizik motoru, bir nesne bir köşeye çarptığında veya hareket ederken onu doğal olarak döndürmeye çalışır.
         //Eğer bunu yapmazsan, karakterin yürürken bir engele çarptığında top gibi yuvarlanmaya başlar.
         //ama bu işlem sonucunda _playerRigitbody.freezeRotation = true; Karakterin fiziksel olarak etkileşime girer ama dik duruşunu asla bozmaz.
+
+        _startingMovementSpeed = _movementSpeed;
+        _startingJumpForce = _jumpForce;
     }
 
     //Update: Bilgisayarın ekran yenileme hızına (FPS) bağlıdır. Tuş basışlarını kaçırmamak için en ideal yerdir.
@@ -202,6 +206,8 @@ public class PlayerController : MonoBehaviour
     {
         _canJump = true;
     }
+    
+    #region Helper Functions
 
     //RayCast, ışın atar
     //karakterin yerde olup olmadığını bu metodla _playerHeight büyüklüğünde ışın atarak kontrol ediyoruz.Eğer ışın yere değiyorsa True döndürerek Evet yerdesin zıplayabilirsin diyeceğiz
@@ -221,4 +227,30 @@ public class PlayerController : MonoBehaviour
     {
         return _isSliding;
     }
+
+    public void SetMovementSpeed(float speed, float duration)
+    {
+        //movementspeed e speed kadar daha ekle
+        _movementSpeed += speed;
+
+        //Alttaki satır, Oyun devam etsin ama duration (süre) kadar zaman geçince, git ResetMovementSpeed fonksiyonunu çalıştır.
+        Invoke(nameof(ResetMovementSpeed), duration);
+    }
+
+     public void ResetMovementSpeed()
+    {
+        //movementspeed e speed kadar daha ekle
+        _movementSpeed = _startingMovementSpeed;
+    }
+
+    public void SetJumpForce(float force, float duration)
+    {
+        _jumpForce += force;
+        Invoke(nameof(ResetJumpForce), duration);
+    }
+    public void ResetJumpForce()
+    {
+       _jumpForce = _startingJumpForce;
+    }
+    #endregion  
 }

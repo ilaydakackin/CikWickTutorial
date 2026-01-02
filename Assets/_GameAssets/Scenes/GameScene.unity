@@ -128,6 +128,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 133134170}
+  - component: {fileID: 133134172}
   - component: {fileID: 133134171}
   m_Layer: 0
   m_Name: GoldWheat
@@ -145,7 +146,7 @@ Transform:
   m_GameObject: {fileID: 133134169}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.619, y: 0.642, z: 0.34}
+  m_LocalPosition: {x: 4.27, y: 0.642, z: 0.34}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -173,6 +174,21 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.86928, y: 1.0794363, z: 0.29500425}
   m_Center: {x: 0.039765, y: -0.16485405, z: 0.015943497}
+--- !u!114 &133134172
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 133134169}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2546dae0ff68bfa4883032804548045c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _playerController: {fileID: 597107633}
+  _movementIncreaseSpeed: 15
+  _resetBoostDuration: 5
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -612,7 +628,7 @@ CapsuleCollider:
   m_Radius: 0.31455585
   m_Height: 0.88523173
   m_Direction: 1
-  m_Center: {x: -0.007953674, y: 0.13968122, z: -0.0866566}
+  m_Center: {x: -0.007953674, y: 0.13968122, z: -6}
 --- !u!54 &597107631
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -676,8 +692,8 @@ MonoBehaviour:
   _jumpKey: 32
   _jumpForce: 10
   _jumpCoolDown: 0.5
-  _airMultipler: 0.5
-  _airDrag: 0.1
+  _airMultipler: 0.2
+  _airDrag: 0.75
   _canJump: 1
   _slideKey: 113
   _slideMultiplier: 1.1
@@ -863,6 +879,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 932213129}
+  - component: {fileID: 932213130}
   - component: {fileID: 932213128}
   m_Layer: 0
   m_Name: HolyWheat
@@ -908,6 +925,21 @@ Transform:
   - {fileID: 1045021604}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &932213130
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 932213127}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d467a5a2887a35e4eb440b4937fa92ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _playerController: {fileID: 597107633}
+  _forceIncrease: 8
+  _resetBoostDuration: 5
 --- !u!1 &1045021603
 GameObject:
   m_ObjectHideFlags: 0
@@ -1220,6 +1252,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1823007493}
+  - component: {fileID: 1823007494}
   - component: {fileID: 1823007492}
   m_Layer: 0
   m_Name: RottenWheat
@@ -1258,13 +1291,28 @@ Transform:
   m_GameObject: {fileID: 1823007491}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.04, y: 0.642, z: 0.34}
+  m_LocalPosition: {x: -6.29, y: 0.642, z: 0.34}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2065473114}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1823007494
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1823007491}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 48c843b80ff8e8d44a1ef39b628e7f62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _playerController: {fileID: 597107633}
+  _movementDecreaseSpeed: -25
+  _resetBoostDuration: 5
 --- !u!1 &2065473113
 GameObject:
   m_ObjectHideFlags: 0
@@ -1382,8 +1430,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4907781123775691213}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: 0, y: -0.00000032584134, z: -0, w: 1}
+  m_LocalPosition: {x: -2.98, y: 2.34, z: -0.92}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
